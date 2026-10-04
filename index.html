@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CineLog - Mis Reseñas y Series</title>
+  <title>CineLog - Mis Reseñas, Series y Anime</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -20,19 +20,23 @@
       }
     }
   </script>
+  <style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white">
 
   <!-- Header -->
   <header class="sticky top-0 z-40 bg-zinc-900/90 backdrop-blur-md border-b border-zinc-800">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 cursor-pointer" onclick="closeExpandedView(); switchTab('library')">
         <i data-lucide="film" class="text-brand-500 w-7 h-7"></i>
         <span class="text-xl font-black tracking-tight bg-gradient-to-r from-red-500 to-amber-500 bg-clip-text text-transparent">CineLog</span>
       </div>
 
       <nav class="flex items-center gap-2">
-        <button id="btn-tab-library" onclick="switchTab('library')" class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition bg-zinc-800 text-white flex items-center gap-1.5">
+        <button id="btn-tab-library" onclick="closeExpandedView(); switchTab('library')" class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition bg-zinc-800 text-white flex items-center gap-1.5">
           <i data-lucide="library" class="w-4 h-4"></i> Mi Colección
         </button>
         <button id="btn-tab-search" onclick="switchTab('search')" class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center gap-1.5">
@@ -50,13 +54,15 @@
 
     <!-- SECCIÓN: MI COLECCIÓN -->
     <section id="section-library">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 class="text-2xl font-bold text-white tracking-tight">Mi Diario Audiovisual</h1>
-          <p class="text-zinc-400 text-sm" id="library-count-text">0 títulos guardados</p>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2">
+      
+      <!-- VISTA EN FILAS / RENGLONES (POR DEFECTO) -->
+      <div id="library-rows-view">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h1 class="text-2xl font-bold text-white tracking-tight">Mi Diario Audiovisual</h1>
+            <p class="text-zinc-400 text-sm" id="library-count-text">0 títulos guardados</p>
+          </div>
+          <!-- Filtro global por estado -->
           <select id="filter-status" onchange="renderLibrary()" class="bg-zinc-900 border border-zinc-700 text-xs rounded-lg px-3 py-2 text-zinc-300 focus:outline-none focus:border-brand-500">
             <option value="all">Todos los estados</option>
             <option value="watching">Viendo</option>
@@ -64,36 +70,102 @@
             <option value="plan_to_watch">Por ver</option>
             <option value="dropped">Abandonadas</option>
           </select>
-          <select id="filter-type" onchange="renderLibrary()" class="bg-zinc-900 border border-zinc-700 text-xs rounded-lg px-3 py-2 text-zinc-300 focus:outline-none focus:border-brand-500">
-            <option value="all">Películas y Series</option>
-            <option value="movie">Solo Películas</option>
-            <option value="tv">Solo Series</option>
-          </select>
+        </div>
+
+        <!-- Fila 1: Películas -->
+        <div id="row-container-movie" class="mb-8">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="p-1 rounded bg-red-500/10 text-red-500 border border-red-500/20"><i data-lucide="clapperboard" class="w-4 h-4"></i></span>
+              <h2 class="text-lg font-bold text-white">Películas</h2>
+              <span id="badge-count-movie" class="text-xs text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded-full border border-zinc-800">0</span>
+            </div>
+            <button onclick="openExpandedView('movie')" class="text-xs text-brand-500 hover:text-red-400 font-semibold flex items-center gap-1">
+              Ver todas <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div class="relative">
+            <div id="row-scroll-movie" class="flex gap-4 overflow-x-auto pb-3 pt-1 no-scrollbar scroll-smooth"></div>
+          </div>
+        </div>
+
+        <!-- Fila 2: Series -->
+        <div id="row-container-tv" class="mb-8">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="p-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20"><i data-lucide="tv" class="w-4 h-4"></i></span>
+              <h2 class="text-lg font-bold text-white">Series de TV</h2>
+              <span id="badge-count-tv" class="text-xs text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded-full border border-zinc-800">0</span>
+            </div>
+            <button onclick="openExpandedView('tv')" class="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1">
+              Ver todas <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div class="relative">
+            <div id="row-scroll-tv" class="flex gap-4 overflow-x-auto pb-3 pt-1 no-scrollbar scroll-smooth"></div>
+          </div>
+        </div>
+
+        <!-- Fila 3: Anime -->
+        <div id="row-container-anime" class="mb-8">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="p-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20"><i data-lucide="sparkles" class="w-4 h-4"></i></span>
+              <h2 class="text-lg font-bold text-white">Anime</h2>
+              <span id="badge-count-anime" class="text-xs text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded-full border border-zinc-800">0</span>
+            </div>
+            <button onclick="openExpandedView('anime')" class="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1">
+              Ver todas <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div class="relative">
+            <div id="row-scroll-anime" class="flex gap-4 overflow-x-auto pb-3 pt-1 no-scrollbar scroll-smooth"></div>
+          </div>
+        </div>
+
+        <!-- Estado vacío global -->
+        <div id="library-empty" class="hidden text-center py-16">
+          <i data-lucide="clapperboard" class="w-12 h-12 text-zinc-600 mx-auto mb-3"></i>
+          <p class="text-zinc-400 font-medium">Aún no tienes títulos en tu diario.</p>
+          <button onclick="switchTab('search')" class="mt-4 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-sm font-semibold transition">
+            Buscar títulos para agregar
+          </button>
         </div>
       </div>
 
-      <div id="library-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+      <!-- VISTA AMPLIA (EXPANDIDA POR CATEGORÍA) -->
+      <div id="library-expanded-view" class="hidden">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-zinc-800">
+          <div class="flex items-center gap-3">
+            <button onclick="closeExpandedView()" class="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition">
+              <i data-lucide="arrow-left" class="w-5 h-5 text-zinc-300"></i>
+            </button>
+            <div>
+              <h2 id="expanded-title" class="text-2xl font-bold text-white tracking-tight"></h2>
+              <p id="expanded-count" class="text-xs text-zinc-400 mt-0.5"></p>
+            </div>
+          </div>
+          <button onclick="closeExpandedView()" class="text-xs font-semibold text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800">
+            Regresar a filas
+          </button>
+        </div>
 
-      <div id="library-empty" class="hidden text-center py-16">
-        <i data-lucide="clapperboard" class="w-12 h-12 text-zinc-600 mx-auto mb-3"></i>
-        <p class="text-zinc-400 font-medium">Aún no tienes títulos en esta lista.</p>
-        <button onclick="switchTab('search')" class="mt-4 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-sm font-semibold transition">
-          Buscar títulos para agregar
-        </button>
+        <div id="expanded-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
       </div>
+
     </section>
 
     <!-- SECCIÓN: BUSCADOR -->
     <section id="section-search" class="hidden">
       <div class="max-w-2xl mx-auto mb-8">
         <h2 class="text-2xl font-bold mb-2 text-center">Explorar Títulos</h2>
-        <p class="text-zinc-400 text-sm text-center mb-6">Busca películas y series para añadirlas a tu diario.</p>
+        <p class="text-zinc-400 text-sm text-center mb-6">Busca películas, series y animes para añadirlos a tu colección.</p>
         
         <form onsubmit="handleSearch(event)" class="relative flex items-center">
           <input 
             type="text" 
             id="search-input" 
-            placeholder="Escribe el nombre de una película o serie..." 
+            placeholder="Ej: Interstellar, Shingeki no Kyojin, Breaking Bad..." 
             class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 pl-11 pr-24 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-brand-500 transition"
           />
           <i data-lucide="search" class="w-5 h-5 text-zinc-500 absolute left-3.5"></i>
@@ -126,28 +198,49 @@
       </div>
 
       <div class="p-5 overflow-y-auto space-y-4 flex-1">
+        <!-- Selector manual de categoría (Película, Serie, Anime) -->
+        <div>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Categoría</label>
+          <div class="grid grid-cols-3 gap-2 text-xs font-medium">
+            <label class="cursor-pointer">
+              <input type="radio" name="item-category" value="movie" class="peer sr-only" />
+              <div class="p-2 rounded-lg border border-zinc-700 peer-checked:border-red-500 peer-checked:bg-red-500/10 peer-checked:text-red-400 text-center transition">Película</div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="item-category" value="tv" class="peer sr-only" />
+              <div class="p-2 rounded-lg border border-zinc-700 peer-checked:border-blue-500 peer-checked:bg-blue-500/10 peer-checked:text-blue-400 text-center transition">Serie</div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="item-category" value="anime" class="peer sr-only" />
+              <div class="p-2 rounded-lg border border-zinc-700 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 peer-checked:text-amber-400 text-center transition">Anime</div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Selector de Estado -->
         <div>
           <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Estado</label>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-medium">
             <label class="cursor-pointer">
               <input type="radio" name="item-status" value="plan_to_watch" class="peer sr-only" />
-              <div class="p-2.5 rounded-lg border border-zinc-700 peer-checked:border-blue-500 peer-checked:bg-blue-500/10 peer-checked:text-blue-400 text-center transition">Por ver</div>
+              <div class="p-2 rounded-lg border border-zinc-700 peer-checked:border-blue-500 peer-checked:bg-blue-500/10 peer-checked:text-blue-400 text-center transition">Por ver</div>
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="item-status" value="watching" class="peer sr-only" />
-              <div class="p-2.5 rounded-lg border border-zinc-700 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 peer-checked:text-amber-400 text-center transition">Viendo</div>
+              <div class="p-2 rounded-lg border border-zinc-700 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 peer-checked:text-amber-400 text-center transition">Viendo</div>
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="item-status" value="completed" class="peer sr-only" />
-              <div class="p-2.5 rounded-lg border border-zinc-700 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 peer-checked:text-emerald-400 text-center transition">Completada</div>
+              <div class="p-2 rounded-lg border border-zinc-700 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 peer-checked:text-emerald-400 text-center transition">Completada</div>
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="item-status" value="dropped" class="peer sr-only" />
-              <div class="p-2.5 rounded-lg border border-zinc-700 peer-checked:border-zinc-500 peer-checked:bg-zinc-800 peer-checked:text-zinc-300 text-center transition">Abandonada</div>
+              <div class="p-2 rounded-lg border border-zinc-700 peer-checked:border-zinc-500 peer-checked:bg-zinc-800 peer-checked:text-zinc-300 text-center transition">Abandonada</div>
             </label>
           </div>
         </div>
 
+        <!-- Calificación -->
         <div>
           <div class="flex justify-between items-center mb-1.5">
             <label class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Mi Calificación</label>
@@ -165,18 +258,20 @@
           />
         </div>
 
+        <!-- Progreso -->
         <div>
           <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Progreso / Episodio</label>
           <input 
             type="text" 
             id="modal-progress" 
-            placeholder="Ej: Temp 1, Ep 3" 
+            placeholder="Ej: Temp 2, Ep 14" 
             class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500"
           />
         </div>
 
+        <!-- Reseña -->
         <div>
-          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Mi Reseña / Notas</label>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Mi Reseña / Opinión</label>
           <textarea 
             id="modal-review-text" 
             rows="3" 
@@ -206,7 +301,6 @@
         <button onclick="closeConfigModal()" class="text-zinc-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <!-- Respaldo / Backup -->
       <div class="space-y-3 bg-zinc-950/60 border border-zinc-800 p-4 rounded-xl">
         <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
           <i data-lucide="hard-drive" class="w-4 h-4"></i> Copia de Seguridad
@@ -225,11 +319,10 @@
         </div>
       </div>
 
-      <!-- TMDb API Key -->
       <div class="space-y-2">
         <h4 class="text-xs font-bold text-zinc-300 uppercase tracking-wider">TMDb API Key</h4>
-        <p class="text-xs text-zinc-400">Pega aquí tu clave gratuita para buscar en todo el catálogo de cine.</p>
-        <input type="text" id="config-tmdb-key" placeholder="Pega aquí tu clave v3" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-xs text-white font-mono focus:outline-none focus:border-brand-500" />
+        <p class="text-xs text-zinc-400">Pega aquí tu clave gratuita para buscar en todo el catálogo.</p>
+        <input type="text" id="config-tmdb-key" placeholder="Pega tu API Key de TMDb" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-xs text-white font-mono focus:outline-none focus:border-brand-500" />
       </div>
 
       <div class="flex justify-end gap-2 pt-2 border-t border-zinc-800">
@@ -245,11 +338,14 @@
 
     let library = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     let currentEditingItem = null;
+    let currentExpandedCategory = null;
 
+    // Catálogo precargado de demostración
     const DEMO_CATALOG = [
       { id: 157336, title: "Interstellar", type: "movie", year: "2014", poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" },
-      { id: 27205, title: "Inception", type: "movie", year: "2010", poster: "https://image.tmdb.org/t/p/w500/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg" },
-      { id: 1396, title: "Breaking Bad", type: "tv", year: "2008", poster: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg" }
+      { id: 1396, title: "Breaking Bad", type: "tv", year: "2008", poster: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg" },
+      { id: 1429, title: "Attack on Titan", type: "anime", year: "2013", poster: "https://image.tmdb.org/t/p/w500/hTP1DtLGFamjfu8WqjnuQdP1n4i.jpg" },
+      { id: 85937, title: "Demon Slayer: Kimetsu no Yaiba", type: "anime", year: "2019", poster: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg" }
     ];
 
     function init() {
@@ -305,20 +401,26 @@
           }
 
           statusEl.textContent = `Se encontraron ${results.length} resultados:`;
-          renderSearchResults(results.map(r => ({
-            id: r.id,
-            title: r.title || r.name,
-            type: r.media_type,
-            year: (r.release_date || r.first_air_date || '').split('-')[0] || 'N/A',
-            poster: r.poster_path ? `https://image.tmdb.org/t/p/w500${r.poster_path}` : 'https://placehold.co/300x450/1e293b/ffffff?text=Sin+Póster',
-            backdrop: r.backdrop_path ? `https://image.tmdb.org/t/p/w780${r.backdrop_path}` : ''
-          })));
+          renderSearchResults(results.map(r => {
+            // Detección automática de anime: animación (género 16) + origen japonés
+            const isAnime = (r.genre_ids || []).includes(16) && (r.original_language === 'ja' || (r.origin_country || []).includes('JP'));
+            const finalType = isAnime ? 'anime' : r.media_type;
+
+            return {
+              id: r.id,
+              title: r.title || r.name,
+              type: finalType,
+              year: (r.release_date || r.first_air_date || '').split('-')[0] || 'N/A',
+              poster: r.poster_path ? `https://image.tmdb.org/t/p/w500${r.poster_path}` : 'https://placehold.co/300x450/1e293b/ffffff?text=Sin+Póster',
+              backdrop: r.backdrop_path ? `https://image.tmdb.org/t/p/w780${r.backdrop_path}` : ''
+            };
+          }));
         } catch (err) {
           statusEl.textContent = 'Error al consultar TMDb. Revisa tu clave en ajustes.';
         }
       } else {
         const filtered = DEMO_CATALOG.filter(item => item.title.toLowerCase().includes(query.toLowerCase()));
-        statusEl.innerHTML = `Mostrando resultados demo. <span class="text-amber-400 cursor-pointer underline" onclick="openConfigModal()">Agrega tu TMDb Key</span> para catálogo completo.`;
+        statusEl.innerHTML = `Resultados demo (${filtered.length}). <span class="text-amber-400 cursor-pointer underline" onclick="openConfigModal()">Agrega tu TMDb Key</span> para catálogo completo.`;
         renderSearchResults(filtered);
       }
     }
@@ -327,12 +429,13 @@
       const grid = document.getElementById('search-grid');
       grid.innerHTML = items.map(item => {
         const inLibrary = library.find(x => x.id === item.id);
+        const typeLabels = { movie: 'Película', tv: 'Serie', anime: 'Anime' };
         return `
           <div class="group relative bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-600 transition flex flex-col">
             <div class="aspect-[2/3] w-full bg-zinc-950 overflow-hidden relative">
               <img src="${item.poster}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" />
               <span class="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-md uppercase text-zinc-300">
-                ${item.type === 'tv' ? 'Serie' : 'Película'}
+                ${typeLabels[item.type] || item.type}
               </span>
               ${inLibrary ? `
                 <span class="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500 text-white flex items-center gap-1 shadow">
@@ -356,68 +459,135 @@
       lucide.createIcons();
     }
 
-    // --- COLECCIÓN ---
+    // --- RENDER COLECCIÓN EN FILAS ---
     function renderLibrary() {
       const statusFilter = document.getElementById('filter-status').value;
-      const typeFilter = document.getElementById('filter-type').value;
 
-      const filtered = library.filter(item => {
-        const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
-        const matchesType = typeFilter === 'all' || item.type === typeFilter;
-        return matchesStatus && matchesType;
-      });
+      // Filtrar títulos
+      const filtered = library.filter(item => statusFilter === 'all' || item.status === statusFilter);
 
       document.getElementById('library-count-text').textContent = `${library.length} títulos guardados`;
-      const grid = document.getElementById('library-grid');
-      const empty = document.getElementById('library-empty');
 
+      const empty = document.getElementById('library-empty');
       if (filtered.length === 0) {
-        grid.innerHTML = '';
+        document.getElementById('row-container-movie').classList.add('hidden');
+        document.getElementById('row-container-tv').classList.add('hidden');
+        document.getElementById('row-container-anime').classList.add('hidden');
         empty.classList.remove('hidden');
         return;
       }
-
       empty.classList.add('hidden');
-      grid.innerHTML = filtered.map(item => {
-        const statusMap = {
-          watching: { label: 'Viendo', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-          completed: { label: 'Completada', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
-          plan_to_watch: { label: 'Por ver', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
-          dropped: { label: 'Abandonada', color: 'bg-zinc-700/40 text-zinc-400 border-zinc-600' }
-        };
-        const badge = statusMap[item.status] || statusMap.plan_to_watch;
 
-        return `
-          <div onclick="editLibraryItem(${item.id})" class="cursor-pointer group relative bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-600 transition flex flex-col">
-            <div class="aspect-[2/3] w-full bg-zinc-950 overflow-hidden relative">
-              <img src="${item.poster}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" />
-              <div class="absolute top-2 left-2 flex flex-col gap-1 items-start">
-                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded border backdrop-blur-md uppercase ${badge.color}">
-                  ${badge.label}
-                </span>
-              </div>
-              ${item.rating > 0 ? `
-                <div class="absolute bottom-2 right-2 bg-black/80 backdrop-blur-md px-1.5 py-0.5 rounded text-[11px] font-bold text-amber-400 flex items-center gap-1 border border-zinc-800">
-                  <i data-lucide="star" class="w-3 h-3 fill-amber-400"></i> ${item.rating}/10
-                </div>
-              ` : ''}
-            </div>
-            <div class="p-3 flex-1 flex flex-col justify-between">
-              <div>
-                <h4 class="font-bold text-xs sm:text-sm text-white line-clamp-1">${item.title}</h4>
-                <p class="text-[11px] text-zinc-400">${item.year} · ${item.type === 'tv' ? 'Serie' : 'Película'}</p>
-                ${item.progress ? `<p class="text-[10px] text-zinc-400 mt-1 truncate"><i data-lucide="play-circle" class="w-2.5 h-2.5 inline mr-0.5"></i>${item.progress}</p>` : ''}
-              </div>
-              ${item.review ? `
-                <p class="mt-2 text-[11px] text-zinc-300 italic line-clamp-2 border-l-2 border-zinc-700 pl-2">
-                  "${item.review}"
-                </p>
-              ` : ''}
-            </div>
-          </div>
-        `;
-      }).join('');
+      // Agrupar por categoría
+      const movies = filtered.filter(i => (i.type || 'movie') === 'movie');
+      const tvs = filtered.filter(i => i.type === 'tv');
+      const animes = filtered.filter(i => i.type === 'anime');
+
+      renderRow('movie', movies);
+      renderRow('tv', tvs);
+      renderRow('anime', animes);
+
+      // Si está abierta la vista expandida, refrescarla también
+      if (currentExpandedCategory) {
+        const catMap = { movie: movies, tv: tvs, anime: animes };
+        renderExpandedGrid(catMap[currentExpandedCategory] || []);
+      }
+
       lucide.createIcons();
+    }
+
+    function renderRow(category, items) {
+      const container = document.getElementById(`row-container-${category}`);
+      const scrollEl = document.getElementById(`row-scroll-${category}`);
+      const badgeCount = document.getElementById(`badge-count-${category}`);
+
+      badgeCount.textContent = items.length;
+
+      if (items.length === 0) {
+        container.classList.add('hidden');
+        scrollEl.innerHTML = '';
+        return;
+      }
+
+      container.classList.remove('hidden');
+      scrollEl.innerHTML = items.map(item => createCardHTML(item, 'row')).join('');
+    }
+
+    function createCardHTML(item, mode = 'row') {
+      const statusMap = {
+        watching: { label: 'Viendo', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
+        completed: { label: 'Completada', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
+        plan_to_watch: { label: 'Por ver', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+        dropped: { label: 'Abandonada', color: 'bg-zinc-700/40 text-zinc-400 border-zinc-600' }
+      };
+      const badge = statusMap[item.status] || statusMap.plan_to_watch;
+
+      // Ancho fijo para filas horizontales, fluido para cuadrícula expandida
+      const cardWidth = mode === 'row' ? 'w-36 sm:w-44 flex-shrink-0' : 'w-full';
+
+      return `
+        <div onclick="editLibraryItem(${item.id})" class="${cardWidth} cursor-pointer group relative bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-600 transition flex flex-col">
+          <div class="aspect-[2/3] w-full bg-zinc-950 overflow-hidden relative">
+            <img src="${item.poster}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" />
+            <div class="absolute top-2 left-2 flex flex-col gap-1 items-start">
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded border backdrop-blur-md uppercase ${badge.color}">
+                ${badge.label}
+              </span>
+            </div>
+            ${item.rating > 0 ? `
+              <div class="absolute bottom-2 right-2 bg-black/80 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-bold text-amber-400 flex items-center gap-1 border border-zinc-800">
+                <i data-lucide="star" class="w-3 h-3 fill-amber-400"></i> ${item.rating}/10
+              </div>
+            ` : ''}
+          </div>
+          <div class="p-2.5 flex-1 flex flex-col justify-between">
+            <div>
+              <h4 class="font-bold text-xs sm:text-sm text-white line-clamp-1">${item.title}</h4>
+              <p class="text-[10px] text-zinc-400">${item.year}</p>
+              ${item.progress ? `<p class="text-[10px] text-zinc-400 mt-1 truncate"><i data-lucide="play-circle" class="w-2.5 h-2.5 inline mr-0.5"></i>${item.progress}</p>` : ''}
+            </div>
+            ${item.review ? `
+              <p class="mt-1.5 text-[10px] text-zinc-300 italic line-clamp-2 border-l-2 border-zinc-700 pl-1.5">
+                "${item.review}"
+              </p>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    // --- VISTA AMPLIA (EXPANDIDA) ---
+    function openExpandedView(category) {
+      currentExpandedCategory = category;
+      const titles = { movie: 'Todas mis Películas', tv: 'Todas mis Series de TV', anime: 'Todos mis Animes' };
+      
+      document.getElementById('library-rows-view').classList.add('hidden');
+      document.getElementById('library-expanded-view').classList.remove('hidden');
+      document.getElementById('expanded-title').textContent = titles[category] || 'Colección';
+
+      const statusFilter = document.getElementById('filter-status').value;
+      const items = library
+        .filter(i => (i.type || 'movie') === category)
+        .filter(i => statusFilter === 'all' || i.status === statusFilter);
+
+      document.getElementById('expanded-count').textContent = `${items.length} títulos en esta categoría`;
+      renderExpandedGrid(items);
+    }
+
+    function renderExpandedGrid(items) {
+      const grid = document.getElementById('expanded-grid');
+      if (items.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-12 text-center text-zinc-500 text-sm">No hay títulos que coincidan con este filtro.</div>`;
+        return;
+      }
+      grid.innerHTML = items.map(item => createCardHTML(item, 'grid')).join('');
+      lucide.createIcons();
+    }
+
+    function closeExpandedView() {
+      currentExpandedCategory = null;
+      document.getElementById('library-expanded-view').classList.add('hidden');
+      document.getElementById('library-rows-view').classList.remove('hidden');
     }
 
     // --- MODAL DE RESEÑA ---
@@ -425,6 +595,7 @@
       const existing = library.find(x => x.id === item.id);
       currentEditingItem = existing ? { ...existing } : {
         ...item,
+        type: item.type || 'movie',
         status: 'plan_to_watch',
         rating: 0,
         progress: '',
@@ -442,10 +613,15 @@
 
     function populateAndOpenModal() {
       document.getElementById('modal-title').textContent = currentEditingItem.title;
-      document.getElementById('modal-year-type').textContent = `${currentEditingItem.year} · ${currentEditingItem.type === 'tv' ? 'Serie' : 'Película'}`;
+      document.getElementById('modal-year-type').textContent = currentEditingItem.year || '';
       document.getElementById('modal-poster').src = currentEditingItem.poster;
       document.getElementById('modal-backdrop').src = currentEditingItem.backdrop || currentEditingItem.poster;
 
+      // Categoría
+      const catRadio = document.querySelector(`input[name="item-category"][value="${currentEditingItem.type || 'movie'}"]`);
+      if (catRadio) catRadio.checked = true;
+
+      // Estado
       const radio = document.querySelector(`input[name="item-status"][value="${currentEditingItem.status || 'plan_to_watch'}"]`);
       if (radio) radio.checked = true;
 
@@ -475,8 +651,12 @@
     function saveCurrentItem() {
       if (!currentEditingItem) return;
 
+      const selectedCat = document.querySelector('input[name="item-category"]:checked');
+      currentEditingItem.type = selectedCat ? selectedCat.value : (currentEditingItem.type || 'movie');
+
       const selectedStatus = document.querySelector('input[name="item-status"]:checked');
       currentEditingItem.status = selectedStatus ? selectedStatus.value : 'plan_to_watch';
+
       currentEditingItem.rating = parseInt(document.getElementById('modal-rating').value, 10) || 0;
       currentEditingItem.progress = document.getElementById('modal-progress').value.trim();
       currentEditingItem.review = document.getElementById('modal-review-text').value.trim();
@@ -503,7 +683,7 @@
       }
     }
 
-    // --- EXPORTAR E IMPORTAR DATOS (BACKUP) ---
+    // --- RESPALDO (BACKUP) ---
     function exportData() {
       if (library.length === 0) {
         alert('No tienes ningún título guardado para exportar.');
@@ -528,8 +708,7 @@
         try {
           const imported = JSON.parse(e.target.result);
           if (Array.isArray(imported)) {
-            if (confirm(`Se encontraron ${imported.length} títulos en el archivo. ¿Deseas importarlos? (Se combinarán con los que ya tienes)`)) {
-              // Combinar sin duplicados por ID
+            if (confirm(`Se encontraron ${imported.length} títulos. ¿Deseas importarlos?`)) {
               const existingIds = new Set(library.map(item => item.id));
               const newItems = imported.filter(item => !existingIds.has(item.id));
               library = [...imported.filter(item => existingIds.has(item.id)), ...newItems];
@@ -537,20 +716,20 @@
               localStorage.setItem(STORAGE_KEY, JSON.stringify(library));
               renderLibrary();
               closeConfigModal();
-              alert('¡Respaldo restaurado con éxito!');
+              alert('¡Respaldo restaurado!');
             }
           } else {
-            alert('El archivo seleccionado no tiene el formato correcto.');
+            alert('Formato de archivo inválido.');
           }
         } catch (err) {
-          alert('Hubo un error al leer el archivo JSON.');
+          alert('Error al leer el archivo JSON.');
         }
       };
       reader.readAsText(file);
-      event.target.value = ''; // limpiar selector
+      event.target.value = '';
     }
 
-    // --- CONFIGURACIÓN DE API KEY ---
+    // --- CONFIGURACIÓN TMDb ---
     function openConfigModal() {
       document.getElementById('config-tmdb-key').value = localStorage.getItem(KEY_TMDB) || '';
       document.getElementById('modal-config').classList.remove('hidden');
