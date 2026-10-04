@@ -55,14 +55,14 @@
     <!-- SECCIÓN: MI COLECCIÓN -->
     <section id="section-library">
       
-      <!-- VISTA EN FILAS / RENGLONES (POR DEFECTO) -->
+      <!-- VISTA EN FILAS / RENGLONES -->
       <div id="library-rows-view">
         <div class="flex items-center justify-between mb-6">
           <div>
             <h1 class="text-2xl font-bold text-white tracking-tight">Mi Diario Audiovisual</h1>
             <p class="text-zinc-400 text-sm" id="library-count-text">0 títulos guardados</p>
           </div>
-          <!-- Filtro global por estado -->
+          <!-- Filtro por estado -->
           <select id="filter-status" onchange="renderLibrary()" class="bg-zinc-900 border border-zinc-700 text-xs rounded-lg px-3 py-2 text-zinc-300 focus:outline-none focus:border-brand-500">
             <option value="all">Todos los estados</option>
             <option value="watching">Viendo</option>
@@ -133,7 +133,7 @@
         </div>
       </div>
 
-      <!-- VISTA AMPLIA (EXPANDIDA POR CATEGORÍA) -->
+      <!-- VISTA EXPANDIDA POR CATEGORÍA -->
       <div id="library-expanded-view" class="hidden">
         <div class="flex items-center justify-between mb-6 pb-4 border-b border-zinc-800">
           <div class="flex items-center gap-3">
@@ -165,7 +165,7 @@
           <input 
             type="text" 
             id="search-input" 
-            placeholder="Ej: Interstellar, Shingeki no Kyojin, Breaking Bad..." 
+            placeholder="Ej: JoJo, Attack on Titan, Interstellar..." 
             class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 pl-11 pr-24 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-brand-500 transition"
           />
           <i data-lucide="search" class="w-5 h-5 text-zinc-500 absolute left-3.5"></i>
@@ -200,7 +200,7 @@
       <div class="p-5 overflow-y-auto space-y-4 flex-1">
         <!-- Selector manual de categoría (Película, Serie, Anime) -->
         <div>
-          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Categoría</label>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Categoría (Cambia si fue mal detectada)</label>
           <div class="grid grid-cols-3 gap-2 text-xs font-medium">
             <label class="cursor-pointer">
               <input type="radio" name="item-category" value="movie" class="peer sr-only" />
@@ -223,19 +223,19 @@
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-medium">
             <label class="cursor-pointer">
               <input type="radio" name="item-status" value="plan_to_watch" class="peer sr-only" />
-              <div class="p-2 rounded-lg border border-zinc-700 peer-checked:border-blue-500 peer-checked:bg-blue-500/10 peer-checked:text-blue-400 text-center transition">Por ver</div>
+              <div class="p-2.5 rounded-lg border border-zinc-700 peer-checked:border-blue-500 peer-checked:bg-blue-500/10 peer-checked:text-blue-400 text-center transition">Por ver</div>
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="item-status" value="watching" class="peer sr-only" />
-              <div class="p-2 rounded-lg border border-zinc-700 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 peer-checked:text-amber-400 text-center transition">Viendo</div>
+              <div class="p-2.5 rounded-lg border border-zinc-700 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 peer-checked:text-amber-400 text-center transition">Viendo</div>
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="item-status" value="completed" class="peer sr-only" />
-              <div class="p-2 rounded-lg border border-zinc-700 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 peer-checked:text-emerald-400 text-center transition">Completada</div>
+              <div class="p-2.5 rounded-lg border border-zinc-700 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 peer-checked:text-emerald-400 text-center transition">Completada</div>
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="item-status" value="dropped" class="peer sr-only" />
-              <div class="p-2 rounded-lg border border-zinc-700 peer-checked:border-zinc-500 peer-checked:bg-zinc-800 peer-checked:text-zinc-300 text-center transition">Abandonada</div>
+              <div class="p-2.5 rounded-lg border border-zinc-700 peer-checked:border-zinc-500 peer-checked:bg-zinc-800 peer-checked:text-zinc-300 text-center transition">Abandonada</div>
             </label>
           </div>
         </div>
@@ -264,14 +264,14 @@
           <input 
             type="text" 
             id="modal-progress" 
-            placeholder="Ej: Temp 2, Ep 14" 
+            placeholder="Ej: Parte 3: Stardust Crusaders, Ep 12" 
             class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500"
           />
         </div>
 
         <!-- Reseña -->
         <div>
-          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Mi Reseña / Opinión</label>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Mi Reseña / Notas</label>
           <textarea 
             id="modal-review-text" 
             rows="3" 
@@ -340,13 +340,49 @@
     let currentEditingItem = null;
     let currentExpandedCategory = null;
 
-    // Catálogo precargado de demostración
+    // Catálogo offline de demostración
     const DEMO_CATALOG = [
       { id: 157336, title: "Interstellar", type: "movie", year: "2014", poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" },
       { id: 1396, title: "Breaking Bad", type: "tv", year: "2008", poster: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg" },
-      { id: 1429, title: "Attack on Titan", type: "anime", year: "2013", poster: "https://image.tmdb.org/t/p/w500/hTP1DtLGFamjfu8WqjnuQdP1n4i.jpg" },
-      { id: 85937, title: "Demon Slayer: Kimetsu no Yaiba", type: "anime", year: "2019", poster: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg" }
+      { id: 46083, title: "JoJo's Bizarre Adventure", type: "anime", year: "2012", poster: "https://image.tmdb.org/t/p/w500/iL8P0BwV92Z2q3p5R0fQn1E5K5f.jpg" },
+      { id: 1429, title: "Attack on Titan", type: "anime", year: "2013", poster: "https://image.tmdb.org/t/p/w500/hTP1DtLGFamjfu8WqjnuQdP1n4i.jpg" }
     ];
+
+    // FUNCIÓN ROBUSTA DE DETECCIÓN DE ANIME
+    function detectIfAnime(r) {
+      const genres = r.genre_ids || [];
+      const hasAnimation = genres.includes(16);
+      const isJapaneseLang = r.original_language === 'ja';
+      const hasJapanOrigin = (r.origin_country || []).includes('JP');
+
+      // Comprobar caracteres japoneses (Hiragana, Katakana, CJK)
+      const titleStr = `${r.title || ''} ${r.name || ''} ${r.original_title || ''} ${r.original_name || ''}`;
+      const hasJapaneseChars = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(titleStr);
+
+      // Si tiene animación y cualquier rasgo japonés evidente
+      if (hasAnimation && (isJapaneseLang || hasJapanOrigin || hasJapaneseChars)) {
+        return true;
+      }
+
+      // Si el idioma es japonés y no es película live action explícita
+      if (isJapaneseLang && hasAnimation) {
+        return true;
+      }
+
+      // Palabras clave comunes que a veces TMDb no marca con origin_country en la búsqueda rápida
+      const lowerTitle = titleStr.toLowerCase();
+      const animeKeywords = [
+        "jojo", "bizarre adventure", "shingeki", "titan", "kimetsu", "yaiba", 
+        "naruto", "boruto", "dragon ball", "one piece", "bleach", "hunter x hunter", 
+        "evangelion", "death note", "fullmetal", "jujutsu", "chainsaw man", "my hero academia", 
+        "boku no hero", "frieren", "solo leveling", "haikyuu", "vinland", "tokyo ghoul"
+      ];
+      if (animeKeywords.some(kw => lowerTitle.includes(kw))) {
+        return true;
+      }
+
+      return false;
+    }
 
     function init() {
       lucide.createIcons();
@@ -402,8 +438,7 @@
 
           statusEl.textContent = `Se encontraron ${results.length} resultados:`;
           renderSearchResults(results.map(r => {
-            // Detección automática de anime: animación (género 16) + origen japonés
-            const isAnime = (r.genre_ids || []).includes(16) && (r.original_language === 'ja' || (r.origin_country || []).includes('JP'));
+            const isAnime = detectIfAnime(r);
             const finalType = isAnime ? 'anime' : r.media_type;
 
             return {
@@ -429,13 +464,18 @@
       const grid = document.getElementById('search-grid');
       grid.innerHTML = items.map(item => {
         const inLibrary = library.find(x => x.id === item.id);
-        const typeLabels = { movie: 'Película', tv: 'Serie', anime: 'Anime' };
+        const typeBadge = {
+          movie: { label: 'Película', color: 'bg-red-500/80 text-white' },
+          tv: { label: 'Serie', color: 'bg-blue-500/80 text-white' },
+          anime: { label: 'Anime', color: 'bg-amber-500/80 text-black' }
+        }[item.type] || { label: item.type, color: 'bg-zinc-700 text-white' };
+
         return `
           <div class="group relative bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-600 transition flex flex-col">
             <div class="aspect-[2/3] w-full bg-zinc-950 overflow-hidden relative">
               <img src="${item.poster}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" />
-              <span class="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-md uppercase text-zinc-300">
-                ${typeLabels[item.type] || item.type}
+              <span class="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 rounded backdrop-blur-md uppercase shadow ${typeBadge.color}">
+                ${typeBadge.label}
               </span>
               ${inLibrary ? `
                 <span class="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500 text-white flex items-center gap-1 shadow">
@@ -462,8 +502,6 @@
     // --- RENDER COLECCIÓN EN FILAS ---
     function renderLibrary() {
       const statusFilter = document.getElementById('filter-status').value;
-
-      // Filtrar títulos
       const filtered = library.filter(item => statusFilter === 'all' || item.status === statusFilter);
 
       document.getElementById('library-count-text').textContent = `${library.length} títulos guardados`;
@@ -487,7 +525,6 @@
       renderRow('tv', tvs);
       renderRow('anime', animes);
 
-      // Si está abierta la vista expandida, refrescarla también
       if (currentExpandedCategory) {
         const catMap = { movie: movies, tv: tvs, anime: animes };
         renderExpandedGrid(catMap[currentExpandedCategory] || []);
@@ -521,8 +558,6 @@
         dropped: { label: 'Abandonada', color: 'bg-zinc-700/40 text-zinc-400 border-zinc-600' }
       };
       const badge = statusMap[item.status] || statusMap.plan_to_watch;
-
-      // Ancho fijo para filas horizontales, fluido para cuadrícula expandida
       const cardWidth = mode === 'row' ? 'w-36 sm:w-44 flex-shrink-0' : 'w-full';
 
       return `
@@ -556,7 +591,7 @@
       `;
     }
 
-    // --- VISTA AMPLIA (EXPANDIDA) ---
+    // --- VISTA EXPANDIDA ---
     function openExpandedView(category) {
       currentExpandedCategory = category;
       const titles = { movie: 'Todas mis Películas', tv: 'Todas mis Series de TV', anime: 'Todos mis Animes' };
@@ -617,7 +652,7 @@
       document.getElementById('modal-poster').src = currentEditingItem.poster;
       document.getElementById('modal-backdrop').src = currentEditingItem.backdrop || currentEditingItem.poster;
 
-      // Categoría
+      // Asignar Categoría en radio button
       const catRadio = document.querySelector(`input[name="item-category"][value="${currentEditingItem.type || 'movie'}"]`);
       if (catRadio) catRadio.checked = true;
 
