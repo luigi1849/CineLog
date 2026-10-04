@@ -14,25 +14,16 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              500: '#e50914',
-              600: '#b81d24',
-              accent: '#f59e0b'
-            }
+            brand: { 500: '#e50914', 600: '#b81d24', accent: '#f59e0b' }
           }
         }
       }
     }
   </script>
-  <style>
-    /* Ocultar barra de scroll pero mantener funcionalidad */
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white">
 
-  <!-- Encabezado / Barra superior -->
+  <!-- Header -->
   <header class="sticky top-0 z-40 bg-zinc-900/90 backdrop-blur-md border-b border-zinc-800">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-2">
@@ -47,19 +38,18 @@
         <button id="btn-tab-search" onclick="switchTab('search')" class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center gap-1.5">
           <i data-lucide="search" class="w-4 h-4"></i> Buscar
         </button>
-        <button onclick="openConfigModal()" class="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition" title="Configurar TMDb API Key">
+        <button onclick="openConfigModal()" class="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition" title="Ajustes y Respaldos">
           <i data-lucide="settings" class="w-4 h-4"></i>
         </button>
       </nav>
     </div>
   </header>
 
-  <!-- Contenedor principal -->
+  <!-- Contenedor Principal -->
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
 
     <!-- SECCIÓN: MI COLECCIÓN -->
     <section id="section-library">
-      <!-- Filtros y Estadísticas -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 class="text-2xl font-bold text-white tracking-tight">Mi Diario Audiovisual</h1>
@@ -67,7 +57,6 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-          <!-- Filtro por estado -->
           <select id="filter-status" onchange="renderLibrary()" class="bg-zinc-900 border border-zinc-700 text-xs rounded-lg px-3 py-2 text-zinc-300 focus:outline-none focus:border-brand-500">
             <option value="all">Todos los estados</option>
             <option value="watching">Viendo</option>
@@ -75,7 +64,6 @@
             <option value="plan_to_watch">Por ver</option>
             <option value="dropped">Abandonadas</option>
           </select>
-          <!-- Filtro por tipo -->
           <select id="filter-type" onchange="renderLibrary()" class="bg-zinc-900 border border-zinc-700 text-xs rounded-lg px-3 py-2 text-zinc-300 focus:outline-none focus:border-brand-500">
             <option value="all">Películas y Series</option>
             <option value="movie">Solo Películas</option>
@@ -84,12 +72,8 @@
         </div>
       </div>
 
-      <!-- Cuadrícula de tarjetas -->
-      <div id="library-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        <!-- Rellenado con JavaScript -->
-      </div>
+      <div id="library-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
 
-      <!-- Estado vacío -->
       <div id="library-empty" class="hidden text-center py-16">
         <i data-lucide="clapperboard" class="w-12 h-12 text-zinc-600 mx-auto mb-3"></i>
         <p class="text-zinc-400 font-medium">Aún no tienes títulos en esta lista.</p>
@@ -103,14 +87,14 @@
     <section id="section-search" class="hidden">
       <div class="max-w-2xl mx-auto mb-8">
         <h2 class="text-2xl font-bold mb-2 text-center">Explorar Títulos</h2>
-        <p class="text-zinc-400 text-sm text-center mb-6">Busca películas y series para añadirlas a tu lista personal.</p>
+        <p class="text-zinc-400 text-sm text-center mb-6">Busca películas y series para añadirlas a tu diario.</p>
         
         <form onsubmit="handleSearch(event)" class="relative flex items-center">
           <input 
             type="text" 
             id="search-input" 
-            placeholder="Escribe el nombre de una película o serie (ej. Interstellar, Breaking Bad)..." 
-            class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 pl-11 pr-24 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-brand-500 transition shadow-inner"
+            placeholder="Escribe el nombre de una película o serie..." 
+            class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 pl-11 pr-24 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-brand-500 transition"
           />
           <i data-lucide="search" class="w-5 h-5 text-zinc-500 absolute left-3.5"></i>
           <button type="submit" class="absolute right-1.5 px-4 py-1.5 bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold rounded-lg transition">
@@ -119,17 +103,14 @@
         </form>
       </div>
 
-      <!-- Resultados de búsqueda -->
       <div id="search-status" class="text-center text-sm text-zinc-400 my-4 hidden"></div>
       <div id="search-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
     </section>
-
   </main>
 
-  <!-- MODAL DE DETALLE Y RESEÑA -->
+  <!-- MODAL DE RESEÑA -->
   <div id="modal-review" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-      <!-- Header del modal -->
       <div class="relative h-40 bg-zinc-800 flex items-end p-4 overflow-hidden">
         <img id="modal-backdrop" src="" class="absolute inset-0 w-full h-full object-cover opacity-30" />
         <div class="relative z-10 flex gap-3 items-end">
@@ -144,9 +125,7 @@
         </button>
       </div>
 
-      <!-- Formulario de reseña -->
       <div class="p-5 overflow-y-auto space-y-4 flex-1">
-        <!-- Selector de Estado -->
         <div>
           <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Estado</label>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-medium">
@@ -169,7 +148,6 @@
           </div>
         </div>
 
-        <!-- Calificación (1 a 10) -->
         <div>
           <div class="flex justify-between items-center mb-1.5">
             <label class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Mi Calificación</label>
@@ -185,37 +163,29 @@
             oninput="updateRatingDisplay(this.value)"
             class="w-full h-1.5 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-amber-500" 
           />
-          <div class="flex justify-between text-[10px] text-zinc-500 mt-1">
-            <span>0</span>
-            <span>5</span>
-            <span>10</span>
-          </div>
         </div>
 
-        <!-- Progreso (para series) -->
-        <div id="series-progress-container">
+        <div>
           <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Progreso / Episodio</label>
           <input 
             type="text" 
             id="modal-progress" 
-            placeholder="Ej: Temporada 2, Ep. 4" 
-            class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brand-500"
+            placeholder="Ej: Temp 1, Ep 3" 
+            class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500"
           />
         </div>
 
-        <!-- Reseña / Comentarios -->
         <div>
-          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Mi Reseña u Opinión</label>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Mi Reseña / Notas</label>
           <textarea 
             id="modal-review-text" 
             rows="3" 
-            placeholder="¿Qué te pareció? Actuaciones, ritmo, final..." 
-            class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brand-500"
+            placeholder="Comentarios personales..." 
+            class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-brand-500"
           ></textarea>
         </div>
       </div>
 
-      <!-- Acciones del modal -->
       <div class="p-4 bg-zinc-950/80 border-t border-zinc-800 flex items-center justify-between">
         <button id="modal-btn-delete" onclick="deleteCurrentItem()" class="text-xs text-red-500 hover:text-red-400 transition flex items-center gap-1">
           <i data-lucide="trash-2" class="w-4 h-4"></i> Eliminar
@@ -228,43 +198,58 @@
     </div>
   </div>
 
-  <!-- MODAL DE CONFIGURACIÓN (API Key de TMDb) -->
+  <!-- MODAL DE CONFIGURACIÓN Y RESPALDO -->
   <div id="modal-config" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl max-w-md w-full p-5 space-y-4 shadow-xl">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl max-w-md w-full p-5 space-y-5 shadow-xl">
       <div class="flex items-center justify-between">
-        <h3 class="font-bold text-base text-white">Configurar TMDb API</h3>
+        <h3 class="font-bold text-base text-white">Ajustes y Respaldos</h3>
         <button onclick="closeConfigModal()" class="text-zinc-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-      <p class="text-xs text-zinc-400 leading-relaxed">
-        Para buscar cualquier película o serie del mundo con pósters oficiales, introduce tu clave de API gratuita de <a href="https://www.themoviedb.org/" target="_blank" class="text-amber-400 underline">themoviedb.org</a>. (Si no tienes, la app usará un catálogo local de demostración).
-      </p>
-      <div>
-        <label class="block text-xs font-semibold text-zinc-400 mb-1">API Read Access Token / API Key</label>
-        <input type="text" id="config-api-key" placeholder="Pega aquí tu clave v3 o v4" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-brand-500 font-mono" />
+
+      <!-- Respaldo / Backup -->
+      <div class="space-y-3 bg-zinc-950/60 border border-zinc-800 p-4 rounded-xl">
+        <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+          <i data-lucide="hard-drive" class="w-4 h-4"></i> Copia de Seguridad
+        </h4>
+        <p class="text-xs text-zinc-400 leading-relaxed">
+          Guarda tus reseñas en un archivo para respaldarlas o pasarlas a otro dispositivo.
+        </p>
+        <div class="flex gap-2 pt-1">
+          <button onclick="exportData()" class="flex-1 py-2 px-3 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-white transition flex items-center justify-center gap-1.5">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar (.json)
+          </button>
+          <label class="flex-1 py-2 px-3 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-white transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <i data-lucide="upload" class="w-3.5 h-3.5"></i> Restaurar
+            <input type="file" id="file-import" accept=".json" onchange="importData(event)" class="sr-only" />
+          </label>
+        </div>
       </div>
-      <div class="flex justify-end gap-2 pt-2">
+
+      <!-- TMDb API Key -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-bold text-zinc-300 uppercase tracking-wider">TMDb API Key</h4>
+        <p class="text-xs text-zinc-400">Pega aquí tu clave gratuita para buscar en todo el catálogo de cine.</p>
+        <input type="text" id="config-tmdb-key" placeholder="Pega aquí tu clave v3" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-xs text-white font-mono focus:outline-none focus:border-brand-500" />
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-zinc-800">
         <button onclick="closeConfigModal()" class="px-3.5 py-1.5 rounded-lg text-xs text-zinc-400 bg-zinc-800">Cerrar</button>
-        <button onclick="saveApiKey()" class="px-3.5 py-1.5 rounded-lg text-xs bg-brand-500 text-white font-semibold hover:bg-brand-600">Guardar clave</button>
+        <button onclick="saveApiKey()" class="px-3.5 py-1.5 rounded-lg text-xs bg-brand-500 text-white font-semibold hover:bg-brand-600">Guardar Clave</button>
       </div>
     </div>
   </div>
 
   <script>
-    // --- ESTADO GLOBAL Y PERSISTENCIA ---
     const STORAGE_KEY = 'cinelog_library_data';
-    const API_KEY_STORAGE = 'cinelog_tmdb_key';
+    const KEY_TMDB = 'cinelog_tmdb_key';
 
     let library = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     let currentEditingItem = null;
 
-    // Catálogo precargado de demostración (funciona sin API key)
     const DEMO_CATALOG = [
       { id: 157336, title: "Interstellar", type: "movie", year: "2014", poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" },
       { id: 27205, title: "Inception", type: "movie", year: "2010", poster: "https://image.tmdb.org/t/p/w500/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg" },
-      { id: 1396, title: "Breaking Bad", type: "tv", year: "2008", poster: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg" },
-      { id: 66732, title: "Stranger Things", type: "tv", year: "2016", poster: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg" },
-      { id: 155, title: "The Dark Knight", type: "movie", year: "2008", poster: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg" },
-      { id: 85271, title: "WandaVision", type: "tv", year: "2021", poster: "https://image.tmdb.org/t/p/w500/glKDUmLiXukrNoLdO7qewT5H63e.jpg" }
+      { id: 1396, title: "Breaking Bad", type: "tv", year: "2008", poster: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg" }
     ];
 
     function init() {
@@ -272,7 +257,7 @@
       renderLibrary();
     }
 
-    // --- NAVEGACIÓN POR PESTAÑAS ---
+    // --- PESTAÑAS ---
     function switchTab(tab) {
       const libSec = document.getElementById('section-library');
       const searchSec = document.getElementById('section-search');
@@ -306,17 +291,16 @@
       statusEl.textContent = 'Buscando títulos...';
       grid.innerHTML = '';
 
-      const apiKey = localStorage.getItem(API_KEY_STORAGE);
+      const apiKey = localStorage.getItem(KEY_TMDB);
 
       if (apiKey) {
-        // Petición a TMDb
         try {
           const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&language=es-MX&query=${encodeURIComponent(query)}&page=1`);
           const data = await res.json();
           const results = (data.results || []).filter(item => item.media_type === 'movie' || item.media_type === 'tv');
 
           if (results.length === 0) {
-            statusEl.textContent = 'No se encontraron resultados en TMDb.';
+            statusEl.textContent = 'No se encontraron resultados.';
             return;
           }
 
@@ -329,14 +313,12 @@
             poster: r.poster_path ? `https://image.tmdb.org/t/p/w500${r.poster_path}` : 'https://placehold.co/300x450/1e293b/ffffff?text=Sin+Póster',
             backdrop: r.backdrop_path ? `https://image.tmdb.org/t/p/w780${r.backdrop_path}` : ''
           })));
-
         } catch (err) {
-          statusEl.textContent = 'Error al consultar TMDb. Revisa tu clave de API en ajustes.';
+          statusEl.textContent = 'Error al consultar TMDb. Revisa tu clave en ajustes.';
         }
       } else {
-        // Filtrar del catálogo de demostración
         const filtered = DEMO_CATALOG.filter(item => item.title.toLowerCase().includes(query.toLowerCase()));
-        statusEl.innerHTML = `Mostrando resultados del catálogo local (${filtered.length}). <span class="text-amber-400 cursor-pointer underline" onclick="openConfigModal()">Agrega tu TMDb API Key</span> para buscar todo el catálogo mundial.`;
+        statusEl.innerHTML = `Mostrando resultados demo. <span class="text-amber-400 cursor-pointer underline" onclick="openConfigModal()">Agrega tu TMDb Key</span> para catálogo completo.`;
         renderSearchResults(filtered);
       }
     }
@@ -354,7 +336,7 @@
               </span>
               ${inLibrary ? `
                 <span class="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500 text-white flex items-center gap-1 shadow">
-                  <i data-lucide="check" class="w-3 h-3"></i> Guardada
+                  <i data-lucide="check" class="w-3 h-3"></i> En Lista
                 </span>
               ` : ''}
             </div>
@@ -365,7 +347,7 @@
               </div>
               <button onclick='openReviewModalFromSearch(${JSON.stringify(item).replace(/'/g, "&apos;")})' class="mt-3 w-full py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-brand-500 text-white transition flex items-center justify-center gap-1">
                 <i data-lucide="${inLibrary ? 'edit-3' : 'plus'}" class="w-3.5 h-3.5"></i>
-                ${inLibrary ? 'Modificar Reseña' : 'Agregar a mi lista'}
+                ${inLibrary ? 'Editar' : 'Agregar'}
               </button>
             </div>
           </div>
@@ -374,7 +356,7 @@
       lucide.createIcons();
     }
 
-    // --- GESTIÓN DE COLECCIÓN (LIBRARY) ---
+    // --- COLECCIÓN ---
     function renderLibrary() {
       const statusFilter = document.getElementById('filter-status').value;
       const typeFilter = document.getElementById('filter-type').value;
@@ -385,8 +367,7 @@
         return matchesStatus && matchesType;
       });
 
-      document.getElementById('library-count-text').textContent = `${library.length} títulos en total`;
-
+      document.getElementById('library-count-text').textContent = `${library.length} títulos guardados`;
       const grid = document.getElementById('library-grid');
       const empty = document.getElementById('library-empty');
 
@@ -439,7 +420,7 @@
       lucide.createIcons();
     }
 
-    // --- MODAL DE RESEÑA / EDICIÓN ---
+    // --- MODAL DE RESEÑA ---
     function openReviewModalFromSearch(item) {
       const existing = library.find(x => x.id === item.id);
       currentEditingItem = existing ? { ...existing } : {
@@ -465,20 +446,16 @@
       document.getElementById('modal-poster').src = currentEditingItem.poster;
       document.getElementById('modal-backdrop').src = currentEditingItem.backdrop || currentEditingItem.poster;
 
-      // Status radio
       const radio = document.querySelector(`input[name="item-status"][value="${currentEditingItem.status || 'plan_to_watch'}"]`);
       if (radio) radio.checked = true;
 
-      // Rating
       const rating = currentEditingItem.rating || 0;
       document.getElementById('modal-rating').value = rating;
       updateRatingDisplay(rating);
 
-      // Progress y Review
       document.getElementById('modal-progress').value = currentEditingItem.progress || '';
       document.getElementById('modal-review-text').value = currentEditingItem.review || '';
 
-      // Botón de eliminar
       const inLibrary = library.some(x => x.id === currentEditingItem.id);
       document.getElementById('modal-btn-delete').style.display = inLibrary ? 'flex' : 'none';
 
@@ -487,8 +464,7 @@
     }
 
     function updateRatingDisplay(val) {
-      const el = document.getElementById('rating-number');
-      el.textContent = val > 0 ? `${val} / 10 ★` : 'Sin calificar';
+      document.getElementById('rating-number').textContent = val > 0 ? `${val} / 10 ★` : 'Sin calificar';
     }
 
     function closeReviewModal() {
@@ -515,16 +491,11 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(library));
       closeReviewModal();
       renderLibrary();
-      if (!document.getElementById('section-search').classList.contains('hidden')) {
-        // refrescar visualización si estamos en búsqueda
-        const q = document.getElementById('search-input').value;
-        if (q) handleSearch(new Event('submit'));
-      }
     }
 
     function deleteCurrentItem() {
       if (!currentEditingItem) return;
-      if (confirm(`¿Eliminar "${currentEditingItem.title}" de tu colección?`)) {
+      if (confirm(`¿Eliminar "${currentEditingItem.title}"?`)) {
         library = library.filter(x => x.id !== currentEditingItem.id);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(library));
         closeReviewModal();
@@ -532,9 +503,56 @@
       }
     }
 
-    // --- MODAL DE CONFIGURACIÓN ---
+    // --- EXPORTAR E IMPORTAR DATOS (BACKUP) ---
+    function exportData() {
+      if (library.length === 0) {
+        alert('No tienes ningún título guardado para exportar.');
+        return;
+      }
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(library, null, 2));
+      const downloadAnchor = document.createElement('a');
+      const date = new Date().toISOString().split('T')[0];
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `cinelog_backup_${date}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            if (confirm(`Se encontraron ${imported.length} títulos en el archivo. ¿Deseas importarlos? (Se combinarán con los que ya tienes)`)) {
+              // Combinar sin duplicados por ID
+              const existingIds = new Set(library.map(item => item.id));
+              const newItems = imported.filter(item => !existingIds.has(item.id));
+              library = [...imported.filter(item => existingIds.has(item.id)), ...newItems];
+
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(library));
+              renderLibrary();
+              closeConfigModal();
+              alert('¡Respaldo restaurado con éxito!');
+            }
+          } else {
+            alert('El archivo seleccionado no tiene el formato correcto.');
+          }
+        } catch (err) {
+          alert('Hubo un error al leer el archivo JSON.');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = ''; // limpiar selector
+    }
+
+    // --- CONFIGURACIÓN DE API KEY ---
     function openConfigModal() {
-      document.getElementById('config-api-key').value = localStorage.getItem(API_KEY_STORAGE) || '';
+      document.getElementById('config-tmdb-key').value = localStorage.getItem(KEY_TMDB) || '';
       document.getElementById('modal-config').classList.remove('hidden');
     }
 
@@ -543,14 +561,14 @@
     }
 
     function saveApiKey() {
-      const key = document.getElementById('config-api-key').value.trim();
+      const key = document.getElementById('config-tmdb-key').value.trim();
       if (key) {
-        localStorage.setItem(API_KEY_STORAGE, key);
+        localStorage.setItem(KEY_TMDB, key);
       } else {
-        localStorage.removeItem(API_KEY_STORAGE);
+        localStorage.removeItem(KEY_TMDB);
       }
       closeConfigModal();
-      alert('Configuración guardada.');
+      alert('Clave guardada con éxito.');
     }
 
     window.onload = init;
