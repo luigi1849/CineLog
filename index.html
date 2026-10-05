@@ -207,6 +207,9 @@
       </div>
 
       <div class="p-5 overflow-y-auto space-y-4 flex-1">
+        <!-- Indicador de fechas en el modal -->
+        <div id="modal-dates-info" class="hidden bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-3 text-xs text-zinc-300"></div>
+
         <!-- Selector manual de categoría (Película, Serie, Anime) -->
         <div>
           <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Categoría (Cambia si fue mal detectada)</label>
@@ -357,6 +360,35 @@
       { id: 1429, title: "Attack on Titan", type: "anime", year: "2013", poster: "https://image.tmdb.org/t/p/w500/hTP1DtLGFamjfu8WqjnuQdP1n4i.jpg" }
     ];
 
+    // CÁLCULO DE DURACIÓN ENTRE FECHAS
+    function calcularTiempoVisualizacion(startedAt, completedAt) {
+      if (!startedAt) return '';
+      const inicio = new Date(startedAt + 'T00:00:00');
+      const fin = completedAt ? new Date(completedAt + 'T00:00:00') : new Date();
+      
+      const diffTime = Math.abs(fin - inicio);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (completedAt) {
+        return diffDays <= 1 ? 'Completada el mismo día' : `Tardaste ${diffDays} días`;
+      }
+      return diffDays <= 1 ? 'Empezada hoy' : `Llevas ${diffDays} días viéndola`;
+    }
+
+    // HTML DE FECHAS PARA LAS TARJETAS
+    function renderCardFechasHTML(item) {
+      if (!item.startedAt && !item.completedAt) return '';
+      const tiempoTexto = calcularTiempoVisualizacion(item.startedAt, item.completedAt);
+
+      return `
+        <div class="mt-2 pt-1.5 border-t border-zinc-800/80 text-[10px] space-y-0.5 text-zinc-400">
+          ${item.startedAt ? `<div class="truncate">📅 Inicio: <span class="text-zinc-200 font-medium">${item.startedAt}</span></div>` : ''}
+          ${item.completedAt ? `<div class="truncate">🏁 Fin: <span class="text-zinc-200 font-medium">${item.completedAt}</span></div>` : ''}
+          ${tiempoTexto ? `<div class="text-sky-400 font-semibold truncate pt-0.5">⏱️ ${tiempoTexto}</div>` : ''}
+        </div>
+      `;
+    }
+
     // FUNCIÓN ROBUSTA DE DETECCIÓN DE ANIME
     function detectIfAnime(r) {
       const genres = r.genre_ids || [];
@@ -364,21 +396,17 @@
       const isJapaneseLang = r.original_language === 'ja';
       const hasJapanOrigin = (r.origin_country || []).includes('JP');
 
-      // Comprobar caracteres japoneses (Hiragana, Katakana, CJK)
       const titleStr = `${r.title || ''} ${r.name || ''} ${r.original_title || ''} ${r.original_name || ''}`;
       const hasJapaneseChars = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(titleStr);
 
-      // Si tiene animación y cualquier rasgo japonés evidente
       if (hasAnimation && (isJapaneseLang || hasJapanOrigin || hasJapaneseChars)) {
         return true;
       }
 
-      // Si el idioma es japonés y no es película live action explícita
       if (isJapaneseLang && hasAnimation) {
         return true;
       }
 
-      // Palabras clave comunes que a veces TMDb no marca con origin_country en la búsqueda rápida
       const lowerTitle = titleStr.toLowerCase();
       const animeKeywords = [
         "jojo", "bizarre adventure", "shingeki", "titan", "kimetsu", "yaiba", 
@@ -525,7 +553,6 @@
       }
       empty.classList.add('hidden');
 
-      // Agrupar por categoría
       const movies = filtered.filter(i => (i.type || 'movie') === 'movie');
       const tvs = filtered.filter(i => i.type === 'tv');
       const animes = filtered.filter(i => i.type === 'anime');
@@ -567,7 +594,7 @@
         dropped: { label: 'Abandonada', color: 'bg-zinc-700/40 text-zinc-400 border-zinc-600' }
       };
       const badge = statusMap[item.status] || statusMap.plan_to_watch;
-      const cardWidth = mode === 'row' ? 'w-36 sm:w-44 flex-shrink-0' : 'w-full';
+      const cardWidth = mode === 'row' ? 'w-40 sm:w-48 flex-shrink-0' : 'w-full';
 
       return `
         <div onclick="editLibraryItem(${item.id})" class="${cardWidth} cursor-pointer group relative bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-600 transition flex flex-col">
@@ -590,6 +617,7 @@
               <p class="text-[10px] text-zinc-400">${item.year}</p>
               ${item.progress ? `<p class="text-[10px] text-zinc-400 mt-1 truncate"><i data-lucide="play-circle" class="w-2.5 h-2.5 inline mr-0.5"></i>${item.progress}</p>` : ''}
             </div>
+            ${renderCardFechasHTML(item)}
             ${item.review ? `
               <p class="mt-1.5 text-[10px] text-zinc-300 italic line-clamp-2 border-l-2 border-zinc-700 pl-1.5">
                 "${item.review}"
@@ -643,7 +671,9 @@
         status: 'plan_to_watch',
         rating: 0,
         progress: '',
-        review: ''
+        review: '',
+        startedAt: null,
+        completedAt: null
       };
       populateAndOpenModal();
     }
@@ -660,6 +690,23 @@
       document.getElementById('modal-year-type').textContent = currentEditingItem.year || '';
       document.getElementById('modal-poster').src = currentEditingItem.poster;
       document.getElementById('modal-backdrop').src = currentEditingItem.backdrop || currentEditingItem.poster;
+
+      // Mostrar información de fechas en el modal
+      const modalDatesEl = document.getElementById('modal-dates-info');
+      const tiempoTexto = calcularTiempoVisualizacion(currentEditingItem.startedAt, currentEditingItem.completedAt);
+      if (currentEditingItem.startedAt || currentEditingItem.completedAt) {
+        modalDatesEl.innerHTML = `
+          <div class="grid grid-cols-2 gap-2">
+            <div><span class="text-zinc-400">Iniciada:</span> <strong class="text-white">${currentEditingItem.startedAt || 'N/A'}</strong></div>
+            <div><span class="text-zinc-400">Finalizada:</span> <strong class="text-white">${currentEditingItem.completedAt || 'En curso'}</strong></div>
+          </div>
+          ${tiempoTexto ? `<div class="mt-1 text-sky-400 font-semibold">⏱️ ${tiempoTexto}</div>` : ''}
+        `;
+        modalDatesEl.classList.remove('hidden');
+      } else {
+        modalDatesEl.classList.add('hidden');
+        modalDatesEl.innerHTML = '';
+      }
 
       // Asignar Categoría en radio button
       const catRadio = document.querySelector(`input[name="item-category"][value="${currentEditingItem.type || 'movie'}"]`);
@@ -695,12 +742,33 @@
     function saveCurrentItem() {
       if (!currentEditingItem) return;
 
+      const hoy = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
+
       const selectedCat = document.querySelector('input[name="item-category"]:checked');
       currentEditingItem.type = selectedCat ? selectedCat.value : (currentEditingItem.type || 'movie');
 
       const selectedStatus = document.querySelector('input[name="item-status"]:checked');
-      currentEditingItem.status = selectedStatus ? selectedStatus.value : 'plan_to_watch';
+      const nuevoEstado = selectedStatus ? selectedStatus.value : 'plan_to_watch';
 
+      // GESTIÓN AUTOMÁTICA DE FECHAS
+      if (nuevoEstado === 'watching' && !currentEditingItem.startedAt) {
+        currentEditingItem.startedAt = hoy;
+      }
+
+      if (nuevoEstado === 'completed') {
+        if (!currentEditingItem.completedAt) {
+          currentEditingItem.completedAt = hoy;
+        }
+        // Si no tenía fecha de inicio y se marca completada, se asigna hoy como inicio
+        if (!currentEditingItem.startedAt) {
+          currentEditingItem.startedAt = hoy;
+        }
+      } else {
+        // Si se cambia de Completada a otro estado, se reinicia la fecha de fin
+        currentEditingItem.completedAt = null;
+      }
+
+      currentEditingItem.status = nuevoEstado;
       currentEditingItem.rating = parseInt(document.getElementById('modal-rating').value, 10) || 0;
       currentEditingItem.progress = document.getElementById('modal-progress').value.trim();
       currentEditingItem.review = document.getElementById('modal-review-text').value.trim();
